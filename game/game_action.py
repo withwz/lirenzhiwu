@@ -19,13 +19,14 @@ class GameAction:
         self.mid_posi = self.adb.screen_width / 2
 
     def do_action(self):
+        count = 0
         while True:
             time.sleep(0.15)
             screen = self.adb.last_screen
             if screen is None:
                 continue
 
-            self.cv_show.picture_frame(screen)
+            # self.cv_show.picture_frame(screen)
             results = self.yolo(screen)
 
             for x in results:
@@ -33,7 +34,7 @@ class GameAction:
                     # 变大后，狂点
                     if x.rect.w > 350:
                         logger.info(x.rect.w)
-                        for _ in range(555):
+                        for _ in range(666):
                             self.adb.tap(self.mid_posi + 400, 400)
                     continue
 
@@ -48,6 +49,10 @@ class GameAction:
             # 没有怪物
             monsterList = [obj for obj in results if obj.label == 0]
             if len(monsterList) == 0:
+                count = count + 1
+                if count > 15:
+                    self.play_again()
+                    return
                 continue
 
             # 找到距离 self.mid_posi 最近的monster x.rect.x
@@ -70,6 +75,14 @@ class GameAction:
                 self.adb.tap(self.mid_posi + 200, 200)
             else:
                 self.adb.tap(self.mid_posi - 200, 200)
+
+    def play_again(self):
+        """
+        再次挑战
+        """
+        logger.info("再次挑战")
+        self.adb.tap(1373, 973)
+        self.do_action()
 
 
 if __name__ == "__main__":
